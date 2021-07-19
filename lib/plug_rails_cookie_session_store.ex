@@ -133,10 +133,14 @@ defmodule PlugRailsCookieSessionStore do
 
   defp decode(:error, _serializer), do: {nil, %{}}
 
-  defp derive(conn, key, key_opts) do
+  defp derive(conn, key, key_opts) when is_binary(key) do
     conn.secret_key_base
     |> validate_secret_key_base()
     |> generate_key(key, key_opts)
+  end
+
+  defp derive(conn, {module, fun, args}, key_opts) do
+    derive(conn, apply(module, fun, args), key_opts)
   end
 
   defp generate_key(secret, nil, _), do: secret
